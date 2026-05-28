@@ -1,10 +1,52 @@
-import express from "express"
-import {ENV} from "./lib/env.js"
+import express from "express";
+import { ENV } from "./lib/env.js";
+import path from "path";//Node.js module used for file/folder paths.
+
 const app = express();
 
+const __dirname = path.resolve();//gives current project root path
+//C:\Users\advit\OneDrive\ドキュメント\mock-interview project\backend
 
-app.get("/",(req,res)=>{
-    res.status(200).json({message:"success from api now hehhe"})
-})
+// API route
+app.get("/api", (req, res) => {
+  res.status(200).json({
+    message: "success from api now hehhe",
+  });
+});
 
-app.listen(ENV.PORT,()=>console.log("server is running on port 3000"));
+// deployment setup
+if (ENV.NODE_ENV === "production") 
+  
+//   why?
+// Because during deployment:
+
+// frontend is already built
+// backend serves frontend files
+
+// But during development:
+
+// Vite runs separately on port 5173
+// Express runs separately on 3000
+  
+  
+  {
+
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));//dist? Vite converts React code into optimized HTML/CSS/JS files.
+  //express.static? It tells Express: "If browser asks for frontend files, serve them."
+//  Example:
+
+// Browser requests:
+// assets/index-abc123.js
+// Express finds it inside:
+// frontend/dist/assets
+// and sends it.
+  app.get("/{*any}", (req, res) => { //means:for any route not matched above:
+    res.sendFile(
+      path.resolve(__dirname, "../frontend" ,{/*go one folder up in frontend */}, "dist", "index.html")//This sends: frontend/dist/index.html to browser
+    );
+  });
+}
+
+app.listen(ENV.PORT, () =>//starting server
+  console.log(`server is running on port ${ENV.PORT}`)
+);
